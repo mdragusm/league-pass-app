@@ -1,0 +1,51 @@
+{
+  "updated": "2026-11-09",
+  "status": "Baseline set by Marcelo 2026-11-09",
+  "rule": "Baseline set by Marcelo. The daily task may move a team only with a stated reason (major injury, trade, clear change in form) and must list every move.",
+  "tiers": {
+    "contender": [
+      "Spurs",
+      "Thunder",
+      "Knicks",
+      "76ers",
+      "Celtics",
+      "Lakers",
+      "Rockets",
+      "Timberwolves",
+      "Warriors"
+    ],
+    "young_and_fun": [
+      "Pistons",
+      "Mavericks",
+      "Raptors",
+      "Trail Blazers",
+      "Grizzlies",
+      "Wizards"
+    ],
+    "mid": [
+      "Cavaliers",
+      "Heat",
+      "Pacers",
+      "Nuggets",
+      "Hawks",
+      "Magic"
+    ],
+    "tanking_or_boring": [
+      "Bulls",
+      "Bucks",
+      "Kings",
+      "Clippers",
+      "Pelicans",
+      "Suns",
+      "Hornets",
+      "Nets",
+      "Jazz"
+    ]
+  },
+  "notes": {
+    "Knicks": "Defending champion (beat the Spurs in the 2026 Finals); stays a contender unless data clearly says otherwise.",
+    "Pacers": "Mid while Haliburton is out.",
+    "Nuggets": "Mid, only notable against contenders when Jokic is healthy.",
+    "Warriors": "Contender per Marcelo; Curry is the reason to watch."
+  }
+}
