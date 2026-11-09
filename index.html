@@ -249,6 +249,7 @@ function renderTonight(note) {
   if (menu.tiers) foot.push(`<p><b>Tiers this week:</b> ${esc(menu.tiers)}</p>`);
   if (menu.sources) foot.push(`<p><b>Sources:</b> ${esc(menu.sources)}</p>`);
   if (menu.generated_at) foot.push(`<p>Generated ${esc(new Date(menu.generated_at).toLocaleString())}</p>`);
+  foot.push('<p><a href="nuvio-test.html" style="color:inherit">Nuvio link test (temporary)</a></p>');
   $('foot').innerHTML = foot.join('');
 }
 
