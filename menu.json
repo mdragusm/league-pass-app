@@ -1,38 +1,11 @@
 {
  "date": "2026-11-09",
  "date_label": "Monday, Nov 09",
- "generated_at": "2026-11-09T17:50:43Z",
+ "generated_at": "2026-11-09T21:22:01.238449Z",
+ "push": "Nuggets @ Rockets 7/10 7:30 - Jokic probable, should be close\nSpurs @ Suns 4/10 8:00 - Wemby against thin Suns, likely comfortable\nLakers @ Hawks 6/10 6:00 - Reaves questionable, back-to-back Lakers",
  "games": [
   {
    "score": 7,
-   "spurs": false,
-   "away": {
-    "name": "Grizzlies",
-    "record": "6-3"
-   },
-   "home": {
-    "name": "Raptors",
-    "record": "5-4"
-   },
-   "tip": "6:30 PM",
-   "notes": "Pippen and Stewart out for Memphis; Barnes and Quickley questionable for Toronto. Two young, fun teams with a real shot at a close, entertaining game."
-  },
-  {
-   "score": 6,
-   "spurs": true,
-   "away": {
-    "name": "Spurs",
-    "record": "8-2"
-   },
-   "home": {
-    "name": "Suns",
-    "record": "3-5"
-   },
-   "tip": "8:00 PM",
-   "notes": "Harris out and Vassell questionable for San Antonio, Goodwin questionable for Phoenix. Wemby and the Spurs should handle a bad Suns team, likely not close."
-  },
-  {
-   "score": 6,
    "spurs": false,
    "away": {
     "name": "Nuggets",
@@ -43,10 +16,10 @@
     "record": "7-3"
    },
    "tip": "7:30 PM",
-   "notes": "Jokic, Murray, Gordon, DeRozan questionable for Denver; Capela out for Houston. If Jokic plays it is a real test for the Rockets, if not a lopsided night."
+   "notes": "Capela and Adams out for Houston; Jokic, Murray probable. Contender hosting a banged-up-but-dangerous Denver, should be close and worth your night."
   },
   {
-   "score": 5,
+   "score": 6,
    "spurs": false,
    "away": {
     "name": "Lakers",
@@ -57,7 +30,35 @@
     "record": "7-4"
    },
    "tip": "6:00 PM",
-   "notes": "Luka sat Sunday with back tightness and tonight's status is unconfirmed. Lakers on a back-to-back, Hawks missing Newell and Landale; fun only if Luka plays."
+   "notes": "Reaves questionable, Grimes out for LA, which is on a back-to-back; Hawks missing Newell and Gilbert. Lakers still lean, but should be a tight one."
+  },
+  {
+   "score": 6,
+   "spurs": false,
+   "away": {
+    "name": "Grizzlies",
+    "record": "6-3"
+   },
+   "home": {
+    "name": "Raptors",
+    "record": "5-4"
+   },
+   "tip": "6:30 PM",
+   "notes": "Barnes, Quickley and Murray-Boyles all questionable for Toronto, Kawhi out; Stewart and Pippen out for Memphis. Two young fun teams, should be close."
+  },
+  {
+   "score": 4,
+   "spurs": true,
+   "away": {
+    "name": "Spurs",
+    "record": "8-2"
+   },
+   "home": {
+    "name": "Suns",
+    "record": "3-5"
+   },
+   "tip": "8:00 PM",
+   "notes": "Vassell and Harris out for San Antonio, Goodwin questionable for Phoenix. Wembanyama and the Spurs should handle a thin Suns team, likely comfortable."
   },
   {
    "score": 4,
@@ -71,10 +72,10 @@
     "record": "6-3"
    },
    "tip": "6:00 PM",
-   "notes": "Duren out for Detroit; Anthony Davis questionable for Washington. Cade and the Pistons on a back-to-back but should still win, likely a comfortable one."
+   "notes": "Anthony Davis and Coulibaly questionable for Washington; Duren out for Detroit, which is on a back-to-back. Cade's Pistons favored but a sneaky watch if Davis plays."
   },
   {
-   "score": 4,
+   "score": 3,
    "spurs": false,
    "away": {
     "name": "Pacers",
@@ -85,10 +86,10 @@
     "record": "6-4"
    },
    "tip": "7:00 PM",
-   "notes": "Haliburton out and McConnell questionable for Indiana; Lively out for Dallas. Flagg's Mavs on a back-to-back but still the better team, so skip unless you like Flagg."
+   "notes": "Haliburton out for Indiana, Lively out for Dallas. Flagg's Mavs on a back-to-back, but still a mid team limping in; likely Dallas."
   },
   {
-   "score": 4,
+   "score": 3,
    "spurs": false,
    "away": {
     "name": "Pelicans",
@@ -99,7 +100,7 @@
     "record": "7-3"
    },
    "tip": "9:00 PM",
-   "notes": "Butler and Porzingis out for Golden State; Missi out for New Orleans on a back-to-back. Curry is the only reason to watch, likely a Warriors win."
+   "notes": "Trey Murphy out for New Orleans; Butler and Porzingis out for Golden State. Curry is the only reason to tune in, likely a Warriors win."
   },
   {
    "score": 2,
@@ -113,9 +114,9 @@
     "record": "3-7"
    },
    "tip": "6:00 PM",
-   "notes": "Knueppel, Miller and Schroder out for Charlotte; Merrill and Tyson out, Allen questionable for Cleveland. Two middling teams, likely a Cavs win, skip."
+   "notes": "Knueppel, Miller, Schroder out for Charlotte; Allen questionable for Cleveland. Mid team against a gutted tanker, skip."
   }
  ],
  "tiers": "Contender: Spurs, Thunder, Knicks, 76ers, Celtics, Lakers, Rockets, Timberwolves, Warriors | Young & fun: Pistons, Mavericks, Raptors, Trail Blazers, Grizzlies, Wizards | Mid: Cavaliers, Heat, Pacers, Nuggets, Hawks, Magic | Tanking or boring: Bulls, Bucks, Kings, Clippers, Pelicans, Suns, Hornets, Nets, Jazz | Tier moves: none",
- "sources": "ESPN scoreboard, ESPN injuries, official NBA injury report 12:45 PM ET snapshot, tiers.json, SI odds via WebSearch"
+ "sources": "ESPN scoreboard, ESPN injuries, tiers.json, official NBA injury report 2:45 PM ET snapshot"
 }
