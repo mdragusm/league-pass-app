@@ -190,7 +190,10 @@ const isSpurs = ev => ev.away.abbr === 'SA' || ev.home.abbr === 'SA';
 const nbaSlug = n => (n === 'LA Clippers' ? 'Los Angeles Clippers' : n).normalize('NFKD').replace(/[^\x00-\x7F]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const nuvioHref = (homeFull, awayFull, iso) =>
   'nuvio://meta?type=movie&amp;id=' + encodeURIComponent(`streamed:basketball-${nbaSlug(homeFull)}-${nbaSlug(awayFull)}-${Math.floor(new Date(iso).getTime() / 864e5)}`);
-const nuvioLink = (homeFull, awayFull, iso) => `<a class="nuvio" href="${nuvioHref(homeFull, awayFull, iso)}">Open in Nuvio</a>`;
+// Off for now: Nuvio's nuvio://meta links ignore the addon's "sport" type and land on its home page (tested 2026-11-09).
+// Flip to true if Nuvio ever supports it; the ids above were verified against the addon's catalog.
+const SHOW_NUVIO = false;
+const nuvioLink = (homeFull, awayFull, iso) => SHOW_NUVIO ? `<a class="nuvio" href="${nuvioHref(homeFull, awayFull, iso)}">Open in Nuvio</a>` : '';
 
 /* ---------- team logos (ESPN's resizer: ~2 KB each; dark variant when the phone is in dark mode) ---------- */
 const logoUrl = (abbr, dark, w) => `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500${dark ? '-dark' : ''}/${String(abbr).toLowerCase()}.png&amp;w=${w * 2}&amp;h=${w * 2}`;
@@ -248,9 +251,7 @@ function renderTonight(note) {
   const foot = [];
   if (menu.tiers) foot.push(`<p><b>Tiers this week:</b> ${esc(menu.tiers)}</p>`);
   if (menu.sources) foot.push(`<p><b>Sources:</b> ${esc(menu.sources)}</p>`);
-  if (menu.generated_at) foot.push(`<p>Generated ${esc(new Date(menu.generated_at).toLocaleString())}</p>`);
-  foot.push('<p><a href="nuvio-test.html" style="color:inherit">Nuvio link test (temporary)</a></p>');
-  $('foot').innerHTML = foot.join('');
+  if (menu.generated_at) foot.push(`<p>Generated ${esc(new Date(menu.generated_at).toLocaleString())}</p>`);  $('foot').innerHTML = foot.join('');
 }
 
 /* ---------- Schedule (month calendar) ---------- */
