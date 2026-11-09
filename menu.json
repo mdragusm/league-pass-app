@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-09",
+  "date_label": "Monday, Nov 09 (SAMPLE DATA)",
+  "generated_at": "2026-11-09T21:25:00Z",
+  "games": [
+    { "score": 8, "spurs": true, "away": {"name": "Timberwolves", "record": "3-3"}, "home": {"name": "Spurs", "record": "5-1"}, "tip": "6:00 PM", "notes": "Sample: Edwards out. Wemby and the Spurs should handle a short-handed Wolves team, likely blowout." },
+    { "score": 5, "spurs": false, "away": {"name": "Hornets", "record": "2-4"}, "home": {"name": "76ers", "record": "5-1"}, "tip": "6:30 PM", "notes": "Sample: Knueppel and Coby White out for Charlotte. Maxey and the Sixers on a back-to-back, still should win comfortably." },
+    { "score": 3, "spurs": false, "away": {"name": "Cavaliers", "record": "4-2"}, "home": {"name": "Bucks", "record": "3-3"}, "tip": "7:00 PM", "notes": "Sample: a good team against a mid one, likely blowout." }
+  ],
+  "tiers": "Sample data",
+  "sources": "Sample data"
+}

@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<title>League Pass Menu</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#14171c; --muted:#5d6673; --line:#e2e5ea; --spurs:#c4ced4; --accent:#1d6fdc; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#181b21; --text:#eef0f3; --muted:#9aa3b0; --line:#2a2f38; --spurs:#2c3138; --accent:#6aa5ff; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding-bottom:env(safe-area-inset-bottom); }
+  header { padding:20px 16px 8px; padding-top:calc(20px + env(safe-area-inset-top)); }
+  h1 { margin:0; font-size:1.35rem; }
+  .sub { color:var(--muted); font-size:.9rem; margin-top:2px; }
+  .banner { margin:8px 16px; padding:8px 12px; border-radius:8px; background:var(--card); border:1px solid var(--line); font-size:.85rem; color:var(--muted); }
+  main { padding:8px 16px 24px; display:grid; gap:10px; max-width:720px; margin:0 auto; }
+  .game { display:grid; grid-template-columns:56px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; }
+  .game.spurs { background:var(--spurs); border-color:var(--text); }
+  .score { font-size:1.35rem; font-weight:700; text-align:center; align-self:start; padding-top:2px; }
+  .score small { display:block; font-size:.7rem; font-weight:500; color:var(--muted); }
+  .s-hi { color:#1a9a4a; } .s-mid { color:#c98a00; } .s-lo { color:#c0392b; }
+  .teams { font-weight:600; }
+  .spurs .teams { font-weight:800; }
+  .tip { color:var(--muted); font-size:.85rem; margin:1px 0 4px; }
+  .notes { font-size:.93rem; }
+  section.foot { max-width:720px; margin:0 auto; padding:0 16px 32px; color:var(--muted); font-size:.82rem; }
+  section.foot p { margin:6px 0; }
+  .empty { text-align:center; padding:40px 16px; color:var(--muted); }
+  button { font:inherit; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">League Pass Menu</h1>
+  <div class="sub" id="sub">Loading…</div>
+</header>
+<div id="banner" class="banner" hidden></div>
+<main id="list"></main>
+<section class="foot" id="foot"></section>
+
+<script>
+// Where the daily menu lives. Relative path works when hosted next to the app (e.g. GitHub Pages).
+const MENU_URL = 'menu.json';
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const team = t => `${esc(t.name)} (${esc(t.record)})`;
+const cls = n => n >= 7 ? 's-hi' : n >= 4 ? 's-mid' : 's-lo';
+
+function render(menu, note) {
+  $('title').textContent = 'League Pass Menu';
+  $('sub').textContent = menu.date_label || menu.date;
+  const b = $('banner');
+  if (note) { b.textContent = note; b.hidden = false; } else b.hidden = true;
+
+  const games = [...(menu.games || [])].sort((a, z) => z.score - a.score);
+  $('list').innerHTML = games.length ? games.map(g => `
+    <article class="game${g.spurs ? ' spurs' : ''}">
+      <div class="score ${cls(g.score)}">${g.score}<small>/10</small></div>
+      <div>
+        <div class="teams">${g.spurs ? 'SPURS - ' : ''}${team(g.away)} @ ${team(g.home)}</div>
+        <div class="tip">${esc(g.tip)}</div>
+        <div class="notes">${esc(g.notes)}</div>
+      </div>
+    </article>`).join('') : '<div class="empty">No NBA games tonight.</div>';
+
+  const foot = [];
+  if (menu.tiers) foot.push(`<p><b>Tiers this week:</b> ${esc(menu.tiers)}</p>`);
+  if (menu.sources) foot.push(`<p><b>Sources:</b> ${esc(menu.sources)}</p>`);
+  if (menu.generated_at) foot.push(`<p>Generated ${esc(new Date(menu.generated_at).toLocaleString())}</p>`);
+  $('foot').innerHTML = foot.join('');
+}
+
+async function load() {
+  try {
+    const res = await fetch(MENU_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const menu = await res.json();
+    try { localStorage.setItem('menu', JSON.stringify(menu)); } catch {}
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
+    render(menu, menu.date && menu.date !== today ? `This menu is for ${menu.date}. Today's isn't published yet.` : '');
+  } catch {
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem('menu')); } catch {}
+    if (cached) render(cached, 'Offline. Showing the last saved menu.');
+    else { $('sub').textContent = ''; $('list').innerHTML = '<div class="empty">Could not load the menu.<br><br><button onclick="load()">Retry</button></div>'; }
+  }
+}
+load();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
+</body>
+</html>
