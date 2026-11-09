@@ -1,12 +1,121 @@
 {
-  "date": "2026-11-09",
-  "date_label": "Monday, Nov 09 (SAMPLE DATA)",
-  "generated_at": "2026-11-09T21:25:00Z",
-  "games": [
-    { "score": 8, "spurs": true, "away": {"name": "Timberwolves", "record": "3-3"}, "home": {"name": "Spurs", "record": "5-1"}, "tip": "6:00 PM", "notes": "Sample: Edwards out. Wemby and the Spurs should handle a short-handed Wolves team, likely blowout." },
-    { "score": 5, "spurs": false, "away": {"name": "Hornets", "record": "2-4"}, "home": {"name": "76ers", "record": "5-1"}, "tip": "6:30 PM", "notes": "Sample: Knueppel and Coby White out for Charlotte. Maxey and the Sixers on a back-to-back, still should win comfortably." },
-    { "score": 3, "spurs": false, "away": {"name": "Cavaliers", "record": "4-2"}, "home": {"name": "Bucks", "record": "3-3"}, "tip": "7:00 PM", "notes": "Sample: a good team against a mid one, likely blowout." }
-  ],
-  "tiers": "Sample data",
-  "sources": "Sample data"
+ "date": "2026-11-09",
+ "date_label": "Monday, Nov 09",
+ "generated_at": "2026-11-09T17:36:49Z",
+ "games": [
+  {
+   "score": 7,
+   "spurs": false,
+   "away": {
+    "name": "Lakers",
+    "record": "9-2"
+   },
+   "home": {
+    "name": "Hawks",
+    "record": "7-4"
+   },
+   "tip": "6:00 PM",
+   "notes": "Lakers report not filed yet, Luka Doncic missed Sunday with back tightness and his status is unconfirmed. Hawks without Newell and Gilbert, Landale questionable. A contender against a young Hawks team, should be close."
+  },
+  {
+   "score": 7,
+   "spurs": false,
+   "away": {
+    "name": "Nuggets",
+    "record": "5-3"
+   },
+   "home": {
+    "name": "Rockets",
+    "record": "7-3"
+   },
+   "tip": "7:30 PM",
+   "notes": "Jokic, Murray, Gordon and DeRozan all questionable for Denver; Capela out for Houston. Great game if the Nuggets stars suit up, a Houston win if they sit."
+  },
+  {
+   "score": 6,
+   "spurs": false,
+   "away": {
+    "name": "Grizzlies",
+    "record": "6-3"
+   },
+   "home": {
+    "name": "Raptors",
+    "record": "5-4"
+   },
+   "tip": "6:30 PM",
+   "notes": "Pippen and Stewart out for Memphis; Barnes and Quickley questionable, Kawhi out for Toronto. Two fun, even teams, should be close."
+  },
+  {
+   "score": 5,
+   "spurs": true,
+   "away": {
+    "name": "Spurs",
+    "record": "8-2"
+   },
+   "home": {
+    "name": "Suns",
+    "record": "3-5"
+   },
+   "tip": "8:00 PM",
+   "notes": "Tobias Harris out, Vassell questionable. Mark Williams out for a Suns team going nowhere. Wemby and the Spurs should win comfortably, but this is a lopsided one."
+  },
+  {
+   "score": 4,
+   "spurs": false,
+   "away": {
+    "name": "Pelicans",
+    "record": "4-6"
+   },
+   "home": {
+    "name": "Warriors",
+    "record": "7-3"
+   },
+   "tip": "9:00 PM",
+   "notes": "Butler, Porzingis, Moody and Richard out for Golden State; Pelicans report not filed. Curry still carries a thin Warriors team against a middling Pelicans group, likely a Warriors win."
+  },
+  {
+   "score": 4,
+   "spurs": false,
+   "away": {
+    "name": "Pacers",
+    "record": "3-7"
+   },
+   "home": {
+    "name": "Mavericks",
+    "record": "6-4"
+   },
+   "tip": "7:00 PM",
+   "notes": "Haliburton out, McConnell questionable for a struggling Pacers team; Mavs report not filed and Flagg's shoulder status unconfirmed. Watch only for Flagg, otherwise a quiet one."
+  },
+  {
+   "score": 3,
+   "spurs": false,
+   "away": {
+    "name": "Wizards",
+    "record": "4-6"
+   },
+   "home": {
+    "name": "Pistons",
+    "record": "6-3"
+   },
+   "tip": "6:00 PM",
+   "notes": "Anthony Davis questionable for Washington; Duren out for Detroit, Pistons report not filed. A good team against a bad one, likely blowout."
+  },
+  {
+   "score": 2,
+   "spurs": false,
+   "away": {
+    "name": "Cavaliers",
+    "record": "5-5"
+   },
+   "home": {
+    "name": "Hornets",
+    "record": "3-7"
+   },
+   "tip": "6:00 PM",
+   "notes": "Knueppel, Miller and Schroder out for Charlotte, Jarrett Allen questionable and Merrill out for Cleveland. Mid team against a gutted one, skip it."
+  }
+ ],
+ "tiers": "Contenders: Spurs, Thunder, Knicks, Nuggets, Rockets, Lakers. Young & fun: Hawks, Raptors, Mavericks (Flagg), Grizzlies, Pistons.",
+ "sources": "ESPN scoreboard and injuries, official NBA injury report (12:30 PM ET snapshot), SI preseason title odds"
 }
