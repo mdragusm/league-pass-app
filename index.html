@@ -71,6 +71,7 @@
   th { color:var(--muted); font-weight:600; position:sticky; top:0; background:var(--card); z-index:1; }
   th:first-child, td:first-child { text-align:left; position:sticky; left:0; background:var(--card); z-index:2; box-shadow:1px 0 0 var(--line); }
   .logo { vertical-align:middle; object-fit:contain; }
+  a.nuvio { display:inline-block; font-size:.78rem; font-weight:600; color:var(--accent); border:1px solid var(--accent); border-radius:999px; padding:1px 10px; text-decoration:none; margin-top:4px; }
   .cell .opp { display:flex; align-items:center; gap:3px; }
   .dnp-list { margin:6px 2px 0; font-size:.8rem; color:var(--muted); }
   .dnp-list a { color:inherit; border-bottom:1px dotted var(--muted); text-decoration:none; }
@@ -133,12 +134,12 @@ const getJSON = async url => { const r = await fetch(url); if (!r.ok) throw new 
 const scoreOf = c => (c.score && typeof c.score === 'object') ? (c.score.displayValue ?? '') : (c.score ?? '');
 function compactEvent(e) {
   const comp = e.competitions[0], st = comp.status.type;
-  const side = h => { const c = comp.competitors.find(x => x.homeAway === h); return { abbr: c.team.abbreviation, name: c.team.shortDisplayName || c.team.name, score: scoreOf(c), win: !!c.winner }; };
+  const side = h => { const c = comp.competitors.find(x => x.homeAway === h); return { abbr: c.team.abbreviation, name: c.team.shortDisplayName || c.team.name, full: c.team.displayName, score: scoreOf(c), win: !!c.winner }; };
   return { id: e.id, date: e.date, state: st.state, detail: st.shortDetail || st.detail, away: side('away'), home: side('home') };
 }
-const dayGames = date => cached('day:' + date, date < todayStr() ? 6e8 : 6e4, async () =>
+const dayGames = date => cached('day2:' + date, date < todayStr() ? 6e8 : 6e4, async () =>
   (await getJSON(`${ESPN}/scoreboard?dates=${date.replaceAll('-', '')}`)).events.map(compactEvent));
-const teamSeason = slug => cached('team:' + slug, 6e5, async () =>
+const teamSeason = slug => cached('team2:' + slug, 6e5, async () =>
   (await getJSON(`${ESPN}/teams/${slug}/schedule?seasontype=2`)).events.map(compactEvent));
 
 async function boxScore(id) {
@@ -154,11 +155,11 @@ async function boxScore(id) {
       return { abbr: p.team.abbreviation, labels: s.labels, totals: s.totals,
         rows: s.athletes.map(a => ({ id: a.athlete.id, n: a.athlete.shortName || a.athlete.displayName, full: a.athlete.displayName, dnp: !!a.didNotPlay, why: a.reason || '', s: a.stats })) };
     });
-    return { id, state: comp.status.type.state, detail: comp.status.type.detail, teams, players };
+    return { id, state: comp.status.type.state, detail: comp.status.type.detail, date: comp.date, teams, players };
   };
   // finished games never change; live/upcoming ones refresh quickly
-  const first = load('c:box2:' + id, null);
-  return cached('box2:' + id, first && first.d.state === 'post' ? 9e12 : 3e4, fetcher);
+  const first = load('c:box3:' + id, null);
+  return cached('box3:' + id, first && first.d.state === 'post' ? 9e12 : 3e4, fetcher);
 }
 
 const gameLog = id => cached('log:' + id, 18e5, async () => {
@@ -182,6 +183,14 @@ function ratingFor(ev) {
   return menu.games.find(g => g.away.name.toLowerCase() === a && g.home.name.toLowerCase() === h) || null;
 }
 const isSpurs = ev => ev.away.abbr === 'SA' || ev.home.abbr === 'SA';
+
+/* ---------- "Open in Nuvio": link to the game's page in the Nuvio app (nuvio://meta, handled by Nuvio itself) ---------- */
+// The sports addon names its games streamed:basketball-<home>-<away>-<UTC day number of tip-off>, e.g.
+// streamed:basketball-atlanta-hawks-los-angeles-lakers-20767. Verified against its catalog; the Clippers are the one naming difference.
+const nbaSlug = n => (n === 'LA Clippers' ? 'Los Angeles Clippers' : n).normalize('NFKD').replace(/[^\x00-\x7F]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const nuvioHref = (homeFull, awayFull, iso) =>
+  'nuvio://meta?type=movie&amp;id=' + encodeURIComponent(`streamed:basketball-${nbaSlug(homeFull)}-${nbaSlug(awayFull)}-${Math.floor(new Date(iso).getTime() / 864e5)}`);
+const nuvioLink = (homeFull, awayFull, iso) => `<a class="nuvio" href="${nuvioHref(homeFull, awayFull, iso)}">Open in Nuvio</a>`;
 
 /* ---------- team logos (ESPN's resizer: ~2 KB each; dark variant when the phone is in dark mode) ---------- */
 const logoUrl = (abbr, dark, w) => `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500${dark ? '-dark' : ''}/${String(abbr).toLowerCase()}.png&amp;w=${w * 2}&amp;h=${w * 2}`;
@@ -208,10 +217,19 @@ function evRow(ev) {
   const today = dayOf(ev.date) === todayStr();
   const tag = (done || live) ? 'a' : 'div';
   return `<${tag} class="row${sp ? ' spurs' : ''}${today ? ' today' : ''}" ${(done || live) ? `href="#game/${ev.id}"` : ''}>
-    <div><div class="teams">${sp ? 'SPURS - ' : ''}${logo(ev.away.abbr, 20)} ${esc(ev.away.name)} @ ${logo(ev.home.abbr, 20)} ${esc(ev.home.name)}${badge}</div><div class="when">${esc(fmtDay(ev.date))}</div></div>${right}</${tag}>`;
+    <div><div class="teams">${sp ? 'SPURS - ' : ''}${logo(ev.away.abbr, 20)} ${esc(ev.away.name)} @ ${logo(ev.home.abbr, 20)} ${esc(ev.home.name)}${badge}</div><div class="when">${esc(fmtDay(ev.date))}</div>${!done && !live ? nuvioLink(ev.home.full, ev.away.full, ev.date) : ''}</div>${right}</${tag}>`;
 }
 
 /* ---------- Tonight ---------- */
+async function addNuvioLinks() {
+  try {
+    const { data } = await dayGames(menu.date);
+    document.querySelectorAll('[data-away]').forEach(el => {
+      const ev = data.find(e => e.away.name.toLowerCase() === el.dataset.away && e.home.name.toLowerCase() === el.dataset.home);
+      if (ev) el.innerHTML = nuvioLink(ev.home.full, ev.away.full, ev.date);
+    });
+  } catch { /* offline: just no link */ }
+}
 function renderTonight(note) {
   setTab('tonight'); setBlock(false); setHead(menu.date_label || menu.date); setBanner(note);
   const games = [...(menu.games || [])].sort((a, z) => z.score - a.score);
@@ -223,8 +241,10 @@ function renderTonight(note) {
         <div class="teams">${g.spurs ? 'SPURS - ' : ''}${team(g.away)} @ ${team(g.home)}</div>
         <div class="tip">${esc(g.tip)}</div>
         <div class="notes">${esc(g.notes)}</div>
+        <div data-away="${esc(g.away.name.toLowerCase())}" data-home="${esc(g.home.name.toLowerCase())}"></div>
       </div>
     </article>`).join('') : '<div class="empty">No NBA games tonight.</div>';
+  addNuvioLinks();
   const foot = [];
   if (menu.tiers) foot.push(`<p><b>Tiers this week:</b> ${esc(menu.tiers)}</p>`);
   if (menu.sources) foot.push(`<p><b>Sources:</b> ${esc(menu.sources)}</p>`);
@@ -315,6 +335,7 @@ async function renderBox(id) {
     let html = `<a class="back" href="javascript:history.back()">‹ Back</a>
       <div class="score-head"><span>${logo(away.abbr, 28)} ${esc(away.score)}</span><span>${esc(home.score)} ${logo(home.abbr, 28)}</span></div>
       <div class="when" style="color:var(--muted)">${esc(b.detail)}</div>
+      ${b.state !== 'post' && b.date ? nuvioLink(home.name, away.name, b.date) : ''}
       <div class="scroll" style="margin-top:8px"><table><tr><th></th>${heads.map(h => `<th>${h}</th>`).join('')}<th>T</th></tr>${line(away)}${line(home)}</table></div>`;
     const cols = ['MIN', 'PTS', 'REB', 'AST', 'FG', '3PT', 'FT', 'STL', 'BLK', 'TO', '+/-'];
     for (const team of [away, home]) {
