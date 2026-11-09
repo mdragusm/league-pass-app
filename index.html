@@ -68,8 +68,12 @@
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--card); }
   table { border-collapse:collapse; width:100%; font-size:.82rem; font-variant-numeric:tabular-nums; }
   th, td { padding:5px 7px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line); }
-  th { color:var(--muted); font-weight:600; position:sticky; top:0; }
-  th:first-child, td:first-child { text-align:left; position:sticky; left:0; background:var(--card); }
+  th { color:var(--muted); font-weight:600; position:sticky; top:0; background:var(--card); z-index:1; }
+  th:first-child, td:first-child { text-align:left; position:sticky; left:0; background:var(--card); z-index:2; box-shadow:1px 0 0 var(--line); }
+  .logo { vertical-align:middle; object-fit:contain; }
+  .cell .opp { display:flex; align-items:center; gap:3px; }
+  .dnp-list { margin:6px 2px 0; font-size:.8rem; color:var(--muted); }
+  .dnp-list a { color:inherit; border-bottom:1px dotted var(--muted); text-decoration:none; }
   td a { color:inherit; text-decoration:none; border-bottom:1px dotted var(--muted); }
   tr.tot td { font-weight:700; }
   tr.dnp td { color:var(--muted); }
@@ -179,6 +183,10 @@ function ratingFor(ev) {
 }
 const isSpurs = ev => ev.away.abbr === 'SA' || ev.home.abbr === 'SA';
 
+/* ---------- team logos (ESPN's resizer: ~2 KB each; dark variant when the phone is in dark mode) ---------- */
+const logoUrl = (abbr, dark, w) => `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nba/500${dark ? '-dark' : ''}/${String(abbr).toLowerCase()}.png&amp;w=${w * 2}&amp;h=${w * 2}`;
+const logo = (abbr, w = 22) => `<picture><source media="(prefers-color-scheme: dark)" srcset="${logoUrl(abbr, 1, w)}"><img class="logo" src="${logoUrl(abbr, 0, w)}" alt="${esc(abbr)}" width="${w}" height="${w}" loading="lazy"></picture>`;
+
 /* ---------- shared UI bits ---------- */
 function setHead(sub) { $('title').textContent = 'League Pass Menu'; $('sub').textContent = sub || ''; }
 function setBanner(note) { const b = $('banner'); if (note) { b.textContent = note; b.hidden = false; } else b.hidden = true; }
@@ -200,7 +208,7 @@ function evRow(ev) {
   const today = dayOf(ev.date) === todayStr();
   const tag = (done || live) ? 'a' : 'div';
   return `<${tag} class="row${sp ? ' spurs' : ''}${today ? ' today' : ''}" ${(done || live) ? `href="#game/${ev.id}"` : ''}>
-    <div><div class="teams">${sp ? 'SPURS - ' : ''}${esc(ev.away.name)} @ ${esc(ev.home.name)}${badge}</div><div class="when">${esc(fmtDay(ev.date))}</div></div>${right}</${tag}>`;
+    <div><div class="teams">${sp ? 'SPURS - ' : ''}${logo(ev.away.abbr, 20)} ${esc(ev.away.name)} @ ${logo(ev.home.abbr, 20)} ${esc(ev.home.name)}${badge}</div><div class="when">${esc(fmtDay(ev.date))}</div></div>${right}</${tag}>`;
 }
 
 /* ---------- Tonight ---------- */
@@ -284,7 +292,7 @@ async function renderSchedule() {
       if (done) line = `<span class="${mine.win ? 'win' : 'loss'}">${mine.win ? 'W' : 'L'} ${esc(mine.score)}-${esc(opp.score)}</span>`;
       else if (live) line = `<span class="rt">${esc(mine.score)}-${esc(opp.score)}</span>`;
       else line = `<span>${esc(fmtTime(ev.date).replace(' PM', 'p').replace(' AM', 'a'))}</span>`;
-      const inner = `<b>${d}</b><span class="opp">${home ? 'vs' : '@'} ${esc(opp.abbr)}</span>${line}${rt}`;
+      const inner = `<b>${d}</b><span class="opp">${home ? 'vs' : '@'} ${logo(opp.abbr, 20)}</span>${line}${rt}`;
       return (done || live) ? `<a class="cell${t}" href="#game/${ev.id}">${inner}</a>` : `<div class="cell${t}">${inner}</div>`;
     });
     $('day-out').innerHTML = '<div class="when" style="color:var(--muted)">Tap a played game for its box score. Everything else is upcoming.</div>';
@@ -305,7 +313,7 @@ async function renderBox(id) {
     const heads = Array.from({ length: n }, (_, i) => i < 4 ? i + 1 : (n - 4 === 1 ? 'OT' : 'OT' + (i - 3)));
     const line = t => `<tr><td>${esc(t.abbr)}</td>${t.lines.map(x => `<td>${esc(x)}</td>`).join('')}<td><b>${esc(t.score)}</b></td></tr>`;
     let html = `<a class="back" href="javascript:history.back()">‹ Back</a>
-      <div class="score-head"><span>${esc(away.name)} ${esc(away.score)}</span><span>${esc(home.name)} ${esc(home.score)}</span></div>
+      <div class="score-head"><span>${logo(away.abbr, 28)} ${esc(away.score)}</span><span>${esc(home.score)} ${logo(home.abbr, 28)}</span></div>
       <div class="when" style="color:var(--muted)">${esc(b.detail)}</div>
       <div class="scroll" style="margin-top:8px"><table><tr><th></th>${heads.map(h => `<th>${h}</th>`).join('')}<th>T</th></tr>${line(away)}${line(home)}</table></div>`;
     const cols = ['MIN', 'PTS', 'REB', 'AST', 'FG', '3PT', 'FT', 'STL', 'BLK', 'TO', '+/-'];
@@ -316,11 +324,11 @@ async function renderBox(id) {
       const cell = (arr, i) => i < 0 ? '' : esc(arr[i] ?? '');
       const played = p.rows.filter(r => !r.dnp), out = p.rows.filter(r => r.dnp);
       const nm = r => r.id ? `<a href="#player/${r.id}/${encodeURIComponent(r.full || r.n)}">${esc(r.n)}</a>` : esc(r.n);
-      html += `<h2>${esc(team.name)}</h2><div class="scroll"><table><tr><th>Player</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
+      html += `<h2>${logo(team.abbr, 22)} ${esc(team.name)}</h2><div class="scroll"><table><tr><th>Player</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
         ${played.map(r => `<tr><td>${nm(r)}</td>${idx.map(i => `<td>${cell(r.s, i)}</td>`).join('')}</tr>`).join('')}
         <tr class="tot"><td>Team</td>${idx.map(i => `<td>${cell(p.totals, i)}</td>`).join('')}</tr>
-        ${out.map(r => `<tr class="dnp"><td>${nm(r)}</td><td colspan="${cols.length}" style="text-align:left">DNP${r.why ? ' - ' + esc(r.why) : ''}</td></tr>`).join('')}
-        </table></div>`;
+        </table></div>
+        ${out.length ? `<div class="dnp-list"><b>DNP:</b> ${out.map(r => `${nm(r)}${r.why ? ' (' + esc(r.why.toLowerCase()) + ')' : ''}`).join(', ')}</div>` : ''}`;
     }
     $('list').innerHTML = `<div class="box">${html}</div>`;
   } catch {
