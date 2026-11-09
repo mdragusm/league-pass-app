@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.mdragusm.leaguepass'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.mdragusm.leaguepass'
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    signingConfigs {
+        release {
+            // Provided by the CI workflow; the keystore never lives in the repo.
+            storeFile System.getenv('KEYSTORE_FILE') ? file(System.getenv('KEYSTORE_FILE')) : null
+            storePassword System.getenv('KEYSTORE_PASSWORD')
+            keyAlias System.getenv('KEY_ALIAS')
+            keyPassword System.getenv('KEY_PASSWORD')
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+// No dependencies on purpose: plain Android framework only, to keep the APK tiny.
