@@ -22,6 +22,7 @@
   nav.tabs a.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   .banner { margin:8px 16px; padding:8px 12px; border-radius:8px; background:var(--card); border:1px solid var(--line); font-size:.85rem; color:var(--muted); }
   main { padding:8px 16px 24px; display:grid; gap:10px; max-width:720px; margin:0 auto; }
+  main.block { display:block; }
   .game { display:grid; grid-template-columns:56px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; color:inherit; text-decoration:none; }
   .game.spurs { background:var(--spurs); border-color:var(--text); }
   .score { font-size:1.35rem; font-weight:700; text-align:center; align-self:start; padding-top:2px; }
@@ -35,19 +36,33 @@
   section.foot p { margin:6px 0; }
   .empty { text-align:center; padding:40px 16px; color:var(--muted); }
   button { font:inherit; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; }
-  /* schedule */
-  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
   .bar select, .bar input { font:inherit; padding:8px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); min-width:0; }
   .bar select { flex:1; }
-  .bar button.ghost { background:var(--card); color:var(--text); border:1px solid var(--line); }
-  .row { display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; color:inherit; text-decoration:none; }
+  .bar .label { flex:1; text-align:center; font-weight:700; }
+  button.ghost { background:var(--card); color:var(--text); border:1px solid var(--line); }
+  .row { display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; color:inherit; text-decoration:none; margin-bottom:10px; }
   .row.spurs { background:var(--spurs); border-color:var(--text); }
   .row.today { border-color:var(--accent); }
   .row .when { color:var(--muted); font-size:.82rem; }
   .row .res { font-weight:700; text-align:right; white-space:nowrap; }
   .pill { display:inline-block; font-size:.75rem; font-weight:700; border:1px solid currentColor; border-radius:999px; padding:0 7px; margin-left:6px; vertical-align:1px; }
   .win { color:#1a9a4a; } .loss { color:#c0392b; }
-  /* box score */
+  /* calendar */
+  .cal { display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; }
+  .dow { text-align:center; font-size:.7rem; color:var(--muted); padding:2px 0; }
+  .cell { min-height:68px; border:1px solid var(--line); border-radius:8px; background:var(--card); padding:3px 4px; font-size:.68rem; line-height:1.25; color:inherit; text-decoration:none; overflow:hidden; display:block; }
+  .cell.blank { border:0; background:none; }
+  .cell b { display:block; font-size:.75rem; color:var(--muted); font-weight:600; }
+  .cell.today { border-color:var(--accent); }
+  .cell.today b { color:var(--accent); }
+  .cell.sel { background:var(--spurs); border-color:var(--text); }
+  .cell.spurs { background:var(--spurs); }
+  .cell .opp { font-weight:700; display:block; }
+  .cell .rt { font-weight:700; display:block; }
+  button.cell { text-align:left; font:inherit; font-size:.68rem; color:var(--text); }
+  button.cell b { font-size:.8rem; }
+  /* box score + player */
   .box h2 { font-size:1.05rem; margin:14px 0 6px; }
   .score-head { display:flex; justify-content:space-between; font-size:1.15rem; font-weight:700; padding:4px 0; }
   .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--card); }
@@ -55,8 +70,10 @@
   th, td { padding:5px 7px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line); }
   th { color:var(--muted); font-weight:600; position:sticky; top:0; }
   th:first-child, td:first-child { text-align:left; position:sticky; left:0; background:var(--card); }
+  td a { color:inherit; text-decoration:none; border-bottom:1px dotted var(--muted); }
   tr.tot td { font-weight:700; }
   tr.dnp td { color:var(--muted); }
+  tr.hl td { font-weight:700; }
   tr:last-child td { border-bottom:0; }
   .back { display:inline-block; margin:0 0 4px; color:var(--accent); text-decoration:none; font-weight:600; }
 </style>
@@ -74,6 +91,7 @@
 <script>
 const MENU_URL = 'menu.json';
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
+const ESPN_ATH = 'https://site.web.api.espn.com/apis/common/v3/sports/basketball/nba/athletes';
 const TZ = 'America/Mexico_City';
 const TEAMS = [['sa','Spurs'],['atl','Hawks'],['bos','Celtics'],['bkn','Nets'],['cha','Hornets'],['chi','Bulls'],['cle','Cavaliers'],['dal','Mavericks'],['den','Nuggets'],['det','Pistons'],['gs','Warriors'],['hou','Rockets'],['ind','Pacers'],['lac','Clippers'],['lal','Lakers'],['mem','Grizzlies'],['mia','Heat'],['mil','Bucks'],['min','Timberwolves'],['no','Pelicans'],['ny','Knicks'],['okc','Thunder'],['orl','Magic'],['phi','76ers'],['phx','Suns'],['por','Trail Blazers'],['sac','Kings'],['tor','Raptors'],['utah','Jazz'],['wsh','Wizards']];
 
@@ -84,21 +102,22 @@ const todayStr = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
 const fmtTime = iso => new Date(iso).toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
 const fmtDay = iso => new Date(iso).toLocaleDateString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric' });
 const dayOf = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
-const addDays = (s, n) => { const d = new Date(s + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const addMonths = (ym, n) => { const [y, m] = ym.split('-').map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.toISOString().slice(0, 7); };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 
 let menu = null;          // today's published menu (ratings), if loaded
-let sched = { team: 'sa', date: todayStr() };
-try { Object.assign(sched, JSON.parse(localStorage.getItem('sched') || '{}'), { date: todayStr() }); } catch {}
-const saveSched = () => { try { localStorage.setItem('sched', JSON.stringify({ team: sched.team })); } catch {}; };
+const sched = Object.assign({ team: 'sa' }, load('sched', {}), { month: todayStr().slice(0, 7), day: todayStr() });
+const saveSched = () => store('sched', { team: sched.team });
 
 /* ---------- data helpers (live from ESPN, compacted + cached for offline) ---------- */
 async function cached(key, ttlMs, fetcher) {
-  let hit = null;
-  try { hit = JSON.parse(localStorage.getItem('c:' + key)); } catch {}
+  const hit = load('c:' + key, null);
   if (hit && Date.now() - hit.t < ttlMs) return { data: hit.d, stale: false };
   try {
     const d = await fetcher();
-    try { localStorage.setItem('c:' + key, JSON.stringify({ t: Date.now(), d })); } catch {}
+    store('c:' + key, { t: Date.now(), d });
     return { data: d, stale: false };
   } catch (e) {
     if (hit) return { data: hit.d, stale: true };
@@ -117,26 +136,40 @@ const dayGames = date => cached('day:' + date, date < todayStr() ? 6e8 : 6e4, as
   (await getJSON(`${ESPN}/scoreboard?dates=${date.replaceAll('-', '')}`)).events.map(compactEvent));
 const teamSeason = slug => cached('team:' + slug, 6e5, async () =>
   (await getJSON(`${ESPN}/teams/${slug}/schedule?seasontype=2`)).events.map(compactEvent));
+
 async function boxScore(id) {
   const fetcher = async () => {
     const d = await getJSON(`${ESPN}/summary?event=${id}`);
     const comp = d.header.competitions[0];
     const teams = comp.competitors.map(c => ({
       home: c.homeAway === 'home', abbr: c.team.abbreviation, name: c.team.displayName, score: c.score,
-      lines: (c.linescores || []).map(l => l.displayValue), record: c.record?.[0]?.displayValue || ''
+      lines: (c.linescores || []).map(l => l.displayValue)
     }));
     const players = d.boxscore.players.map(p => {
       const s = p.statistics[0]; if (!s) return { abbr: p.team.abbreviation, labels: [], rows: [], totals: [] };
       return { abbr: p.team.abbreviation, labels: s.labels, totals: s.totals,
-        rows: s.athletes.map(a => ({ n: a.athlete.shortName || a.athlete.displayName, st: !!a.starter, dnp: !!a.didNotPlay, why: a.reason || '', s: a.stats })) };
+        rows: s.athletes.map(a => ({ id: a.athlete.id, n: a.athlete.shortName || a.athlete.displayName, full: a.athlete.displayName, dnp: !!a.didNotPlay, why: a.reason || '', s: a.stats })) };
     });
-    return { id, state: comp.status.type.state, detail: comp.status.type.detail, date: comp.date, teams, players };
+    return { id, state: comp.status.type.state, detail: comp.status.type.detail, teams, players };
   };
   // finished games never change; live/upcoming ones refresh quickly
-  const first = JSON.parse(localStorage.getItem('c:box:' + id) || 'null');
-  const final = first && first.d.state === 'post';
-  return cached('box:' + id, final ? 9e12 : 3e4, fetcher);
+  const first = load('c:box2:' + id, null);
+  return cached('box2:' + id, first && first.d.state === 'post' ? 9e12 : 3e4, fetcher);
 }
+
+const gameLog = id => cached('log:' + id, 18e5, async () => {
+  const g = await getJSON(`${ESPN_ATH}/${id}/gamelog`);
+  const rs = (g.seasonTypes || []).find(s => /regular/i.test(s.displayName)) || (g.seasonTypes || [])[0];
+  const games = [];
+  for (const cat of (rs ? rs.categories : [])) for (const ev of (cat.events || [])) {
+    const m = (g.events || {})[ev.eventId]; if (!m) continue;
+    const mine = String(m.team?.id) === String(m.homeTeamId) ? m.homeTeamScore : m.awayTeamScore;
+    const theirs = String(m.team?.id) === String(m.homeTeamId) ? m.awayTeamScore : m.homeTeamScore;
+    games.push({ id: ev.eventId, date: m.gameDate, at: m.atVs, opp: m.opponent?.abbreviation, res: m.gameResult, my: mine, their: theirs, s: ev.stats });
+  }
+  games.sort((a, b) => b.date.localeCompare(a.date));
+  return { labels: g.labels, games };
+});
 
 /* ---------- ratings for today ---------- */
 function ratingFor(ev) {
@@ -146,13 +179,33 @@ function ratingFor(ev) {
 }
 const isSpurs = ev => ev.away.abbr === 'SA' || ev.home.abbr === 'SA';
 
-/* ---------- views ---------- */
+/* ---------- shared UI bits ---------- */
 function setHead(sub) { $('title').textContent = 'League Pass Menu'; $('sub').textContent = sub || ''; }
 function setBanner(note) { const b = $('banner'); if (note) { b.textContent = note; b.hidden = false; } else b.hidden = true; }
 function setTab(name) { $('tab-tonight').className = name === 'tonight' ? 'on' : ''; $('tab-schedule').className = name === 'schedule' ? 'on' : ''; }
+function setBlock(on) { $('list').classList.toggle('block', on); }
 
+function evRow(ev) {
+  const r = ratingFor(ev), sp = isSpurs(ev), live = ev.state === 'in', done = ev.state === 'post';
+  const badge = r ? `<span class="pill ${cls(r.score)}">${r.score}/10</span>` : '';
+  let right;
+  if (done) {
+    const w = ev.away.win ? ev.away : ev.home;
+    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(w.abbr)} won</div></div>`;
+  } else if (live) {
+    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(ev.detail)}</div></div>`;
+  } else {
+    right = `<div class="res">${esc(fmtTime(ev.date))}</div>`;
+  }
+  const today = dayOf(ev.date) === todayStr();
+  const tag = (done || live) ? 'a' : 'div';
+  return `<${tag} class="row${sp ? ' spurs' : ''}${today ? ' today' : ''}" ${(done || live) ? `href="#game/${ev.id}"` : ''}>
+    <div><div class="teams">${sp ? 'SPURS - ' : ''}${esc(ev.away.name)} @ ${esc(ev.home.name)}${badge}</div><div class="when">${esc(fmtDay(ev.date))}</div></div>${right}</${tag}>`;
+}
+
+/* ---------- Tonight ---------- */
 function renderTonight(note) {
-  setTab('tonight'); setHead(menu.date_label || menu.date); setBanner(note);
+  setTab('tonight'); setBlock(false); setHead(menu.date_label || menu.date); setBanner(note);
   const games = [...(menu.games || [])].sort((a, z) => z.score - a.score);
   const team = t => `${esc(t.name)} (${esc(t.record)})`;
   $('list').innerHTML = games.length ? games.map(g => `
@@ -171,73 +224,78 @@ function renderTonight(note) {
   $('foot').innerHTML = foot.join('');
 }
 
-function evRow(ev, opts = {}) {
-  const r = ratingFor(ev), sp = isSpurs(ev), live = ev.state === 'in', done = ev.state === 'post';
-  const badge = r ? `<span class="pill ${cls(r.score)}">${r.score}/10</span>` : '';
-  let right;
-  if (done) {
-    const w = ev.away.win ? ev.away : ev.home;
-    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(w.abbr)} won</div></div>`;
-  } else if (live) {
-    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(ev.detail)}</div></div>`;
-  } else {
-    right = `<div class="res">${esc(fmtTime(ev.date))}</div>`;
-  }
-  const label = opts.team
-    ? (() => { const home = ev.home.abbr.toLowerCase() === opts.team.abbr; const opp = home ? ev.away : ev.home;
-        const me = home ? ev.home : ev.away; const res = done ? `<span class="${me.win ? 'win' : 'loss'}">${me.win ? 'W' : 'L'}</span> ` : '';
-        return `${res}${home ? 'vs' : '@'} ${esc(opp.name)}`; })()
-    : `${sp ? 'SPURS - ' : ''}${esc(ev.away.name)} @ ${esc(ev.home.name)}`;
-  const today = dayOf(ev.date) === todayStr();
-  const tag = (done || live) ? 'a' : 'div';
-  return `<${tag} class="row${sp ? ' spurs' : ''}${today ? ' today' : ''}" ${(done || live) ? `href="#game/${ev.id}"` : ''} data-up="${done ? 0 : 1}">
-    <div><div class="teams">${label}${badge}</div><div class="when">${esc(fmtDay(ev.date))}${opts.team && !done && !live ? ' · ' + esc(fmtTime(ev.date)) : ''}</div></div>${right}</${tag}>`;
+/* ---------- Schedule (month calendar) ---------- */
+function calendarShell(cellFor) {
+  const [y, m] = sched.month.split('-').map(Number);
+  const lead = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  let cells = '<div class="cell blank"></div>'.repeat(lead);
+  for (let d = 1; d <= days; d++) cells += cellFor(`${sched.month}-${String(d).padStart(2, '0')}`, d);
+  return ['S','M','T','W','T','F','S'].map(x => `<div class="dow">${x}</div>`).join('') + cells;
 }
 
 async function renderSchedule() {
-  setTab('schedule'); setHead('Schedule'); $('foot').innerHTML = '';
+  setTab('schedule'); setBlock(true); setHead('Schedule'); $('foot').innerHTML = ''; setBanner('');
   const opts = TEAMS.map(([s, n]) => `<option value="${s}"${s === sched.team ? ' selected' : ''}>${n}</option>`).join('');
-  const dateBar = sched.team === 'all' ? `
-      <button class="ghost" id="prev">‹</button>
-      <input type="date" id="date" value="${sched.date}">
-      <button class="ghost" id="next">›</button>
-      <button class="ghost" id="today">Today</button>` : '';
-  $('list').innerHTML = `<div class="bar"><select id="team"><option value="all"${sched.team === 'all' ? ' selected' : ''}>All teams (by date)</option>${opts}</select>${dateBar}</div><div id="sched-out" class="empty">Loading…</div>`;
+  const [y, m] = sched.month.split('-').map(Number);
+  $('list').innerHTML = `
+    <div class="bar"><select id="team"><option value="all"${sched.team === 'all' ? ' selected' : ''}>All teams</option>${opts}</select></div>
+    <div class="bar"><button class="ghost" id="prev">‹</button><div class="label">${MONTHS[m - 1]} ${y}</div><button class="ghost" id="next">›</button><button class="ghost" id="today">Today</button></div>
+    <div class="cal" id="cal"><div class="empty" style="grid-column:1/-1">Loading…</div></div>
+    <div id="day-out" style="margin-top:12px"></div>`;
   $('team').onchange = e => { sched.team = e.target.value; saveSched(); renderSchedule(); };
+  $('prev').onclick = () => { sched.month = addMonths(sched.month, -1); renderSchedule(); };
+  $('next').onclick = () => { sched.month = addMonths(sched.month, 1); renderSchedule(); };
+  $('today').onclick = () => { sched.month = todayStr().slice(0, 7); sched.day = todayStr(); renderSchedule(); };
+  const today = todayStr();
+
   if (sched.team === 'all') {
-    $('prev').onclick = () => { sched.date = addDays(sched.date, -1); renderSchedule(); };
-    $('next').onclick = () => { sched.date = addDays(sched.date, 1); renderSchedule(); };
-    $('today').onclick = () => { sched.date = todayStr(); renderSchedule(); };
-    $('date').onchange = e => { if (e.target.value) { sched.date = e.target.value; renderSchedule(); } };
+    $('cal').innerHTML = calendarShell((ds, d) => `<button class="cell${ds === today ? ' today' : ''}${ds === sched.day ? ' sel' : ''}" data-d="${ds}"><b>${d}</b></button>`);
+    $('cal').querySelectorAll('button.cell').forEach(b => b.onclick = () => { sched.day = b.dataset.d; renderSchedule(); });
+    if (sched.day.startsWith(sched.month)) {
+      const out = $('day-out'); out.innerHTML = '<div class="empty">Loading…</div>';
+      try {
+        const { data, stale } = await dayGames(sched.day);
+        setBanner(stale ? 'Offline. Showing saved data.' : '');
+        out.innerHTML = `<div class="when" style="color:var(--muted);margin-bottom:6px">${esc(fmtDay(sched.day + 'T18:00:00Z'))}</div>` + (data.length ? data.map(evRow).join('') : '<div class="empty">No games this day.</div>');
+      } catch { out.innerHTML = '<div class="empty">Could not load this day.</div>'; }
+    } else $('day-out').innerHTML = '<div class="empty">Tap a day to see its games.</div>';
+    return;
   }
-  const out = $('sched-out');
+
   try {
-    if (sched.team === 'all') {
-      const { data, stale } = await dayGames(sched.date);
-      setBanner(stale ? 'Offline. Showing saved data.' : '');
-      out.className = ''; out.style.display = 'grid'; out.style.gap = '10px';
-      out.innerHTML = data.length ? data.map(e => evRow(e)).join('') : '<div class="empty">No games this day.</div>';
-    } else {
-      const { data, stale } = await teamSeason(sched.team);
-      setBanner(stale ? 'Offline. Showing saved data.' : '');
-      // The team appears in every game of its own schedule, so its abbreviation is the most frequent one.
-      const counts = {}; data.forEach(e => { counts[e.home.abbr] = (counts[e.home.abbr] || 0) + 1; counts[e.away.abbr] = (counts[e.away.abbr] || 0) + 1; });
-      const t = { abbr: (Object.entries(counts).sort((a, b) => b[1] - a[1])[0] || [sched.team])[0].toLowerCase() };
-      const wins = data.filter(e => e.state === 'post' && (e.home.abbr.toLowerCase() === t.abbr ? e.home.win : e.away.win)).length;
-      const played = data.filter(e => e.state === 'post').length;
-      setHead(`Schedule · ${played ? wins + '-' + (played - wins) : 'season not started'}`);
-      out.className = ''; out.style.display = 'grid'; out.style.gap = '10px';
-      out.innerHTML = data.map(e => evRow(e, { team: t })).join('') || '<div class="empty">No games found.</div>';
-      const next = out.querySelector('[data-up="1"]');
-      if (next) next.scrollIntoView({ block: 'center' });
-    }
+    const { data, stale } = await teamSeason(sched.team);
+    setBanner(stale ? 'Offline. Showing saved data.' : '');
+    const counts = {}; data.forEach(e => { counts[e.home.abbr] = (counts[e.home.abbr] || 0) + 1; counts[e.away.abbr] = (counts[e.away.abbr] || 0) + 1; });
+    const me = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0] || [sched.team.toUpperCase()])[0];
+    const played = data.filter(e => e.state === 'post');
+    const wins = played.filter(e => (e.home.abbr === me ? e.home.win : e.away.win)).length;
+    setHead(`Schedule · ${played.length ? wins + '-' + (played.length - wins) : 'season not started'}`);
+    const byDay = {}; data.forEach(e => { (byDay[dayOf(e.date)] ||= []).push(e); });
+    $('cal').innerHTML = calendarShell((ds, d) => {
+      const ev = (byDay[ds] || [])[0];
+      const t = ds === today ? ' today' : '';
+      if (!ev) return `<div class="cell${t}"><b>${d}</b></div>`;
+      const home = ev.home.abbr === me, opp = home ? ev.away : ev.home, mine = home ? ev.home : ev.away;
+      const done = ev.state === 'post', live = ev.state === 'in';
+      const r = ratingFor(ev);
+      const rt = r ? `<span class="rt ${cls(r.score)}">${r.score}/10</span>` : '';
+      let line;
+      if (done) line = `<span class="${mine.win ? 'win' : 'loss'}">${mine.win ? 'W' : 'L'} ${esc(mine.score)}-${esc(opp.score)}</span>`;
+      else if (live) line = `<span class="rt">${esc(mine.score)}-${esc(opp.score)}</span>`;
+      else line = `<span>${esc(fmtTime(ev.date).replace(' PM', 'p').replace(' AM', 'a'))}</span>`;
+      const inner = `<b>${d}</b><span class="opp">${home ? 'vs' : '@'} ${esc(opp.abbr)}</span>${line}${rt}`;
+      return (done || live) ? `<a class="cell${t}" href="#game/${ev.id}">${inner}</a>` : `<div class="cell${t}">${inner}</div>`;
+    });
+    $('day-out').innerHTML = '<div class="when" style="color:var(--muted)">Tap a played game for its box score. Everything else is upcoming.</div>';
   } catch {
-    out.innerHTML = 'Could not load the schedule.<br><br><button onclick="renderSchedule()">Retry</button>';
+    $('cal').innerHTML = '<div class="empty" style="grid-column:1/-1">Could not load the schedule.<br><br><button onclick="renderSchedule()">Retry</button></div>';
   }
 }
 
+/* ---------- Box score ---------- */
 async function renderBox(id) {
-  setTab('schedule'); $('foot').innerHTML = ''; setHead('Box score'); setBanner('');
+  setTab('schedule'); setBlock(true); $('foot').innerHTML = ''; setHead('Box score'); setBanner('');
   $('list').innerHTML = '<div class="empty">Loading…</div>';
   try {
     const { data: b, stale } = await boxScore(id);
@@ -257,16 +315,65 @@ async function renderBox(id) {
       const idx = cols.map(c => p.labels.indexOf(c));
       const cell = (arr, i) => i < 0 ? '' : esc(arr[i] ?? '');
       const played = p.rows.filter(r => !r.dnp), out = p.rows.filter(r => r.dnp);
+      const nm = r => r.id ? `<a href="#player/${r.id}/${encodeURIComponent(r.full || r.n)}">${esc(r.n)}</a>` : esc(r.n);
       html += `<h2>${esc(team.name)}</h2><div class="scroll"><table><tr><th>Player</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
-        ${played.map(r => `<tr><td>${esc(r.n)}</td>${idx.map(i => `<td>${cell(r.s, i)}</td>`).join('')}</tr>`).join('')}
+        ${played.map(r => `<tr><td>${nm(r)}</td>${idx.map(i => `<td>${cell(r.s, i)}</td>`).join('')}</tr>`).join('')}
         <tr class="tot"><td>Team</td>${idx.map(i => `<td>${cell(p.totals, i)}</td>`).join('')}</tr>
-        ${out.map(r => `<tr class="dnp"><td>${esc(r.n)}</td><td colspan="${cols.length}" style="text-align:left">DNP${r.why ? ' - ' + esc(r.why) : ''}</td></tr>`).join('')}
+        ${out.map(r => `<tr class="dnp"><td>${nm(r)}</td><td colspan="${cols.length}" style="text-align:left">DNP${r.why ? ' - ' + esc(r.why) : ''}</td></tr>`).join('')}
         </table></div>`;
     }
     $('list').innerHTML = `<div class="box">${html}</div>`;
-    $('list').style.display = 'block';
   } catch {
     $('list').innerHTML = '<div class="empty">Could not load this box score.<br><br><button onclick="route()">Retry</button></div>';
+  }
+}
+
+/* ---------- Player averages ---------- */
+function averages(games, labels) {
+  const ix = l => labels.indexOf(l);
+  const num = (g, l) => parseFloat(g.s[ix(l)]) || 0;
+  const pair = (g, l) => String(g.s[ix(l)] ?? '0-0').split('-').map(Number).map(v => v || 0);
+  const n = games.length || 1, sum = f => games.reduce((a, g) => a + f(g), 0);
+  const sp = l => [sum(g => pair(g, l)[0]), sum(g => pair(g, l)[1])];
+  const [fgm, fga] = sp('FG'), [tpm, tpa] = sp('3PT'), [ftm, fta] = sp('FT');
+  const f1 = v => (v / n).toFixed(1), pct = (a, b) => b ? (100 * a / b).toFixed(1) : '-';
+  return [games.length, f1(sum(g => num(g, 'MIN'))), f1(sum(g => num(g, 'PTS'))), f1(sum(g => num(g, 'REB'))), f1(sum(g => num(g, 'AST'))),
+    f1(sum(g => num(g, 'STL'))), f1(sum(g => num(g, 'BLK'))), f1(sum(g => num(g, 'TO'))),
+    `${f1(fgm)}-${f1(fga)}`, `${f1(tpm)}-${f1(tpa)}`, `${f1(ftm)}-${f1(fta)}`, pct(fgm, fga), pct(tpm, tpa), pct(ftm, fta)];
+}
+
+async function renderPlayer(id, name) {
+  setTab('schedule'); setBlock(true); $('foot').innerHTML = ''; setHead('Player'); setBanner('');
+  $('list').innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const { data, stale } = await gameLog(id);
+    setBanner(stale ? 'Offline. Showing saved data.' : '');
+    const played = data.games.filter(g => { const m = parseFloat(g.s[data.labels.indexOf('MIN')]); return m > 0; });
+    const ns = [3, 5, 10, 15, 20];
+    let last = load('lastN', 5);
+    const draw = () => {
+      const recent = played.slice(0, last);
+      const head = ['', 'GP', 'MIN', 'PTS', 'REB', 'AST', 'STL', 'BLK', 'TO', 'FG', '3PT', 'FT', 'FG%', '3P%', 'FT%'];
+      const row = (label, g) => `<tr class="hl"><td>${label}</td>${averages(g, data.labels).map(v => `<td>${esc(v)}</td>`).join('')}</tr>`;
+      const logCols = ['MIN', 'PTS', 'REB', 'AST', 'FG', '3PT', 'FT', 'STL', 'BLK', 'TO'];
+      const lix = logCols.map(c => data.labels.indexOf(c));
+      $('list').innerHTML = `<div class="box">
+        <a class="back" href="javascript:history.back()">‹ Back</a>
+        <div class="score-head"><span>${esc(name)}</span></div>
+        <div class="bar" style="margin-top:6px"><span class="when" style="color:var(--muted)">Recent form:</span>
+          <select id="lastn">${ns.map(v => `<option value="${v}"${v === last ? ' selected' : ''}>Last ${v} games</option>`).join('')}</select></div>
+        ${played.length ? `<div class="scroll"><table><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr>
+          ${row('Season', played)}${row('Last ' + Math.min(last, played.length), recent)}</table></div>
+        <h2>Game log</h2>
+        <div class="scroll"><table><tr><th>Game</th><th></th>${logCols.map(c => `<th>${c}</th>`).join('')}</tr>
+          ${played.map(g => `<tr><td><a href="#game/${g.id}">${esc(fmtDay(g.date))} ${esc(g.at)} ${esc(g.opp)}</a></td><td class="${g.res === 'W' ? 'win' : 'loss'}">${esc(g.res)} ${esc(g.my)}-${esc(g.their)}</td>${lix.map(i => `<td>${esc(g.s[i] ?? '')}</td>`).join('')}</tr>`).join('')}
+        </table></div>` : '<div class="empty">No games played yet this season.</div>'}
+      </div>`;
+      const sel = $('lastn'); if (sel) sel.onchange = e => { last = +e.target.value; store('lastN', last); draw(); };
+    };
+    draw();
+  } catch {
+    $('list').innerHTML = '<div class="empty">Could not load this player.<br><br><button onclick="route()">Retry</button></div>';
   }
 }
 
@@ -276,26 +383,26 @@ async function loadMenu() {
     const res = await fetch(MENU_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error(res.status);
     menu = await res.json();
-    try { localStorage.setItem('menu', JSON.stringify(menu)); } catch {}
+    store('menu', menu);
     return menu.date && menu.date !== todayStr() ? `This menu is for ${menu.date}. Today's isn't published yet.` : '';
   } catch {
-    try { menu = JSON.parse(localStorage.getItem('menu')); } catch {}
+    menu = load('menu', null);
     return menu ? 'Offline. Showing the last saved menu.' : null;
   }
 }
 
 async function route() {
   const h = location.hash.replace(/^#/, '');
-  $('list').style.display = '';
-  if (h.startsWith('game/')) return renderBox(h.slice(5));
+  if (h.startsWith('game/')) { if (!menu) await loadMenu(); return renderBox(h.slice(5)); }
+  if (h.startsWith('player/')) { const p = h.split('/'); return renderPlayer(p[1], decodeURIComponent(p.slice(2).join('/'))); }
   if (h === 'schedule') { if (!menu) await loadMenu(); return renderSchedule(); }
   const note = await loadMenu();
-  if (note === null) { setTab('tonight'); setHead(''); $('list').innerHTML = '<div class="empty">Could not load the menu.<br><br><button onclick="route()">Retry</button></div>'; return; }
+  if (note === null) { setTab('tonight'); setBlock(false); setHead(''); $('list').innerHTML = '<div class="empty">Could not load the menu.<br><br><button onclick="route()">Retry</button></div>'; return; }
   renderTonight(note);
 }
 window.addEventListener('hashchange', route);
 route();
-document.addEventListener('visibilitychange', () => { if (!document.hidden && !location.hash.startsWith('#game/')) route(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !/^#(game|player)\//.test(location.hash)) route(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
