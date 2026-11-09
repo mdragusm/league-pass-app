@@ -17,9 +17,12 @@
   header { padding:20px 16px 8px; padding-top:calc(20px + env(safe-area-inset-top)); }
   h1 { margin:0; font-size:1.35rem; }
   .sub { color:var(--muted); font-size:.9rem; margin-top:2px; }
+  nav.tabs { display:flex; gap:8px; padding:4px 16px 8px; max-width:720px; margin:0 auto; }
+  nav.tabs a { flex:1; text-align:center; padding:8px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); text-decoration:none; font-weight:600; font-size:.95rem; }
+  nav.tabs a.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   .banner { margin:8px 16px; padding:8px 12px; border-radius:8px; background:var(--card); border:1px solid var(--line); font-size:.85rem; color:var(--muted); }
   main { padding:8px 16px 24px; display:grid; gap:10px; max-width:720px; margin:0 auto; }
-  .game { display:grid; grid-template-columns:56px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; }
+  .game { display:grid; grid-template-columns:56px 1fr; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; color:inherit; text-decoration:none; }
   .game.spurs { background:var(--spurs); border-color:var(--text); }
   .score { font-size:1.35rem; font-weight:700; text-align:center; align-self:start; padding-top:2px; }
   .score small { display:block; font-size:.7rem; font-weight:500; color:var(--muted); }
@@ -32,6 +35,30 @@
   section.foot p { margin:6px 0; }
   .empty { text-align:center; padding:40px 16px; color:var(--muted); }
   button { font:inherit; background:var(--accent); color:#fff; border:0; border-radius:8px; padding:8px 14px; }
+  /* schedule */
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .bar select, .bar input { font:inherit; padding:8px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); min-width:0; }
+  .bar select { flex:1; }
+  .bar button.ghost { background:var(--card); color:var(--text); border:1px solid var(--line); }
+  .row { display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; color:inherit; text-decoration:none; }
+  .row.spurs { background:var(--spurs); border-color:var(--text); }
+  .row.today { border-color:var(--accent); }
+  .row .when { color:var(--muted); font-size:.82rem; }
+  .row .res { font-weight:700; text-align:right; white-space:nowrap; }
+  .pill { display:inline-block; font-size:.75rem; font-weight:700; border:1px solid currentColor; border-radius:999px; padding:0 7px; margin-left:6px; vertical-align:1px; }
+  .win { color:#1a9a4a; } .loss { color:#c0392b; }
+  /* box score */
+  .box h2 { font-size:1.05rem; margin:14px 0 6px; }
+  .score-head { display:flex; justify-content:space-between; font-size:1.15rem; font-weight:700; padding:4px 0; }
+  .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--card); }
+  table { border-collapse:collapse; width:100%; font-size:.82rem; font-variant-numeric:tabular-nums; }
+  th, td { padding:5px 7px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; position:sticky; top:0; }
+  th:first-child, td:first-child { text-align:left; position:sticky; left:0; background:var(--card); }
+  tr.tot td { font-weight:700; }
+  tr.dnp td { color:var(--muted); }
+  tr:last-child td { border-bottom:0; }
+  .back { display:inline-block; margin:0 0 4px; color:var(--accent); text-decoration:none; font-weight:600; }
 </style>
 </head>
 <body>
@@ -39,26 +66,95 @@
   <h1 id="title">League Pass Menu</h1>
   <div class="sub" id="sub">Loading…</div>
 </header>
+<nav class="tabs"><a href="#tonight" id="tab-tonight">Tonight</a><a href="#schedule" id="tab-schedule">Schedule</a></nav>
 <div id="banner" class="banner" hidden></div>
 <main id="list"></main>
 <section class="foot" id="foot"></section>
 
 <script>
-// Where the daily menu lives. Relative path works when hosted next to the app (e.g. GitHub Pages).
 const MENU_URL = 'menu.json';
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
+const TZ = 'America/Mexico_City';
+const TEAMS = [['sa','Spurs'],['atl','Hawks'],['bos','Celtics'],['bkn','Nets'],['cha','Hornets'],['chi','Bulls'],['cle','Cavaliers'],['dal','Mavericks'],['den','Nuggets'],['det','Pistons'],['gs','Warriors'],['hou','Rockets'],['ind','Pacers'],['lac','Clippers'],['lal','Lakers'],['mem','Grizzlies'],['mia','Heat'],['mil','Bucks'],['min','Timberwolves'],['no','Pelicans'],['ny','Knicks'],['okc','Thunder'],['orl','Magic'],['phi','76ers'],['phx','Suns'],['por','Trail Blazers'],['sac','Kings'],['tor','Raptors'],['utah','Jazz'],['wsh','Wizards']];
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const team = t => `${esc(t.name)} (${esc(t.record)})`;
 const cls = n => n >= 7 ? 's-hi' : n >= 4 ? 's-mid' : 's-lo';
+const todayStr = () => new Date().toLocaleDateString('en-CA', { timeZone: TZ });
+const fmtTime = iso => new Date(iso).toLocaleTimeString('en-US', { timeZone: TZ, hour: 'numeric', minute: '2-digit' });
+const fmtDay = iso => new Date(iso).toLocaleDateString('en-US', { timeZone: TZ, weekday: 'short', month: 'short', day: 'numeric' });
+const dayOf = iso => new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+const addDays = (s, n) => { const d = new Date(s + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 
-function render(menu, note) {
-  $('title').textContent = 'League Pass Menu';
-  $('sub').textContent = menu.date_label || menu.date;
-  const b = $('banner');
-  if (note) { b.textContent = note; b.hidden = false; } else b.hidden = true;
+let menu = null;          // today's published menu (ratings), if loaded
+let sched = { team: 'sa', date: todayStr() };
+try { Object.assign(sched, JSON.parse(localStorage.getItem('sched') || '{}'), { date: todayStr() }); } catch {}
+const saveSched = () => { try { localStorage.setItem('sched', JSON.stringify({ team: sched.team })); } catch {}; };
 
+/* ---------- data helpers (live from ESPN, compacted + cached for offline) ---------- */
+async function cached(key, ttlMs, fetcher) {
+  let hit = null;
+  try { hit = JSON.parse(localStorage.getItem('c:' + key)); } catch {}
+  if (hit && Date.now() - hit.t < ttlMs) return { data: hit.d, stale: false };
+  try {
+    const d = await fetcher();
+    try { localStorage.setItem('c:' + key, JSON.stringify({ t: Date.now(), d })); } catch {}
+    return { data: d, stale: false };
+  } catch (e) {
+    if (hit) return { data: hit.d, stale: true };
+    throw e;
+  }
+}
+const getJSON = async url => { const r = await fetch(url); if (!r.ok) throw new Error(r.status); return r.json(); };
+
+const scoreOf = c => (c.score && typeof c.score === 'object') ? (c.score.displayValue ?? '') : (c.score ?? '');
+function compactEvent(e) {
+  const comp = e.competitions[0], st = comp.status.type;
+  const side = h => { const c = comp.competitors.find(x => x.homeAway === h); return { abbr: c.team.abbreviation, name: c.team.shortDisplayName || c.team.name, score: scoreOf(c), win: !!c.winner }; };
+  return { id: e.id, date: e.date, state: st.state, detail: st.shortDetail || st.detail, away: side('away'), home: side('home') };
+}
+const dayGames = date => cached('day:' + date, date < todayStr() ? 6e8 : 6e4, async () =>
+  (await getJSON(`${ESPN}/scoreboard?dates=${date.replaceAll('-', '')}`)).events.map(compactEvent));
+const teamSeason = slug => cached('team:' + slug, 6e5, async () =>
+  (await getJSON(`${ESPN}/teams/${slug}/schedule?seasontype=2`)).events.map(compactEvent));
+async function boxScore(id) {
+  const fetcher = async () => {
+    const d = await getJSON(`${ESPN}/summary?event=${id}`);
+    const comp = d.header.competitions[0];
+    const teams = comp.competitors.map(c => ({
+      home: c.homeAway === 'home', abbr: c.team.abbreviation, name: c.team.displayName, score: c.score,
+      lines: (c.linescores || []).map(l => l.displayValue), record: c.record?.[0]?.displayValue || ''
+    }));
+    const players = d.boxscore.players.map(p => {
+      const s = p.statistics[0]; if (!s) return { abbr: p.team.abbreviation, labels: [], rows: [], totals: [] };
+      return { abbr: p.team.abbreviation, labels: s.labels, totals: s.totals,
+        rows: s.athletes.map(a => ({ n: a.athlete.shortName || a.athlete.displayName, st: !!a.starter, dnp: !!a.didNotPlay, why: a.reason || '', s: a.stats })) };
+    });
+    return { id, state: comp.status.type.state, detail: comp.status.type.detail, date: comp.date, teams, players };
+  };
+  // finished games never change; live/upcoming ones refresh quickly
+  const first = JSON.parse(localStorage.getItem('c:box:' + id) || 'null');
+  const final = first && first.d.state === 'post';
+  return cached('box:' + id, final ? 9e12 : 3e4, fetcher);
+}
+
+/* ---------- ratings for today ---------- */
+function ratingFor(ev) {
+  if (!menu || !menu.games || dayOf(ev.date) !== menu.date) return null;
+  const a = ev.away.name.toLowerCase(), h = ev.home.name.toLowerCase();
+  return menu.games.find(g => g.away.name.toLowerCase() === a && g.home.name.toLowerCase() === h) || null;
+}
+const isSpurs = ev => ev.away.abbr === 'SA' || ev.home.abbr === 'SA';
+
+/* ---------- views ---------- */
+function setHead(sub) { $('title').textContent = 'League Pass Menu'; $('sub').textContent = sub || ''; }
+function setBanner(note) { const b = $('banner'); if (note) { b.textContent = note; b.hidden = false; } else b.hidden = true; }
+function setTab(name) { $('tab-tonight').className = name === 'tonight' ? 'on' : ''; $('tab-schedule').className = name === 'schedule' ? 'on' : ''; }
+
+function renderTonight(note) {
+  setTab('tonight'); setHead(menu.date_label || menu.date); setBanner(note);
   const games = [...(menu.games || [])].sort((a, z) => z.score - a.score);
+  const team = t => `${esc(t.name)} (${esc(t.record)})`;
   $('list').innerHTML = games.length ? games.map(g => `
     <article class="game${g.spurs ? ' spurs' : ''}">
       <div class="score ${cls(g.score)}">${g.score}<small>/10</small></div>
@@ -68,7 +164,6 @@ function render(menu, note) {
         <div class="notes">${esc(g.notes)}</div>
       </div>
     </article>`).join('') : '<div class="empty">No NBA games tonight.</div>';
-
   const foot = [];
   if (menu.tiers) foot.push(`<p><b>Tiers this week:</b> ${esc(menu.tiers)}</p>`);
   if (menu.sources) foot.push(`<p><b>Sources:</b> ${esc(menu.sources)}</p>`);
@@ -76,23 +171,131 @@ function render(menu, note) {
   $('foot').innerHTML = foot.join('');
 }
 
-async function load() {
+function evRow(ev, opts = {}) {
+  const r = ratingFor(ev), sp = isSpurs(ev), live = ev.state === 'in', done = ev.state === 'post';
+  const badge = r ? `<span class="pill ${cls(r.score)}">${r.score}/10</span>` : '';
+  let right;
+  if (done) {
+    const w = ev.away.win ? ev.away : ev.home;
+    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(w.abbr)} won</div></div>`;
+  } else if (live) {
+    right = `<div class="res">${esc(ev.away.score)} - ${esc(ev.home.score)}<div class="when">${esc(ev.detail)}</div></div>`;
+  } else {
+    right = `<div class="res">${esc(fmtTime(ev.date))}</div>`;
+  }
+  const label = opts.team
+    ? (() => { const home = ev.home.abbr.toLowerCase() === opts.team.abbr; const opp = home ? ev.away : ev.home;
+        const me = home ? ev.home : ev.away; const res = done ? `<span class="${me.win ? 'win' : 'loss'}">${me.win ? 'W' : 'L'}</span> ` : '';
+        return `${res}${home ? 'vs' : '@'} ${esc(opp.name)}`; })()
+    : `${sp ? 'SPURS - ' : ''}${esc(ev.away.name)} @ ${esc(ev.home.name)}`;
+  const today = dayOf(ev.date) === todayStr();
+  const tag = (done || live) ? 'a' : 'div';
+  return `<${tag} class="row${sp ? ' spurs' : ''}${today ? ' today' : ''}" ${(done || live) ? `href="#game/${ev.id}"` : ''} data-up="${done ? 0 : 1}">
+    <div><div class="teams">${label}${badge}</div><div class="when">${esc(fmtDay(ev.date))}${opts.team && !done && !live ? ' · ' + esc(fmtTime(ev.date)) : ''}</div></div>${right}</${tag}>`;
+}
+
+async function renderSchedule() {
+  setTab('schedule'); setHead('Schedule'); $('foot').innerHTML = '';
+  const opts = TEAMS.map(([s, n]) => `<option value="${s}"${s === sched.team ? ' selected' : ''}>${n}</option>`).join('');
+  const dateBar = sched.team === 'all' ? `
+      <button class="ghost" id="prev">‹</button>
+      <input type="date" id="date" value="${sched.date}">
+      <button class="ghost" id="next">›</button>
+      <button class="ghost" id="today">Today</button>` : '';
+  $('list').innerHTML = `<div class="bar"><select id="team"><option value="all"${sched.team === 'all' ? ' selected' : ''}>All teams (by date)</option>${opts}</select>${dateBar}</div><div id="sched-out" class="empty">Loading…</div>`;
+  $('team').onchange = e => { sched.team = e.target.value; saveSched(); renderSchedule(); };
+  if (sched.team === 'all') {
+    $('prev').onclick = () => { sched.date = addDays(sched.date, -1); renderSchedule(); };
+    $('next').onclick = () => { sched.date = addDays(sched.date, 1); renderSchedule(); };
+    $('today').onclick = () => { sched.date = todayStr(); renderSchedule(); };
+    $('date').onchange = e => { if (e.target.value) { sched.date = e.target.value; renderSchedule(); } };
+  }
+  const out = $('sched-out');
+  try {
+    if (sched.team === 'all') {
+      const { data, stale } = await dayGames(sched.date);
+      setBanner(stale ? 'Offline. Showing saved data.' : '');
+      out.className = ''; out.style.display = 'grid'; out.style.gap = '10px';
+      out.innerHTML = data.length ? data.map(e => evRow(e)).join('') : '<div class="empty">No games this day.</div>';
+    } else {
+      const { data, stale } = await teamSeason(sched.team);
+      setBanner(stale ? 'Offline. Showing saved data.' : '');
+      // The team appears in every game of its own schedule, so its abbreviation is the most frequent one.
+      const counts = {}; data.forEach(e => { counts[e.home.abbr] = (counts[e.home.abbr] || 0) + 1; counts[e.away.abbr] = (counts[e.away.abbr] || 0) + 1; });
+      const t = { abbr: (Object.entries(counts).sort((a, b) => b[1] - a[1])[0] || [sched.team])[0].toLowerCase() };
+      const wins = data.filter(e => e.state === 'post' && (e.home.abbr.toLowerCase() === t.abbr ? e.home.win : e.away.win)).length;
+      const played = data.filter(e => e.state === 'post').length;
+      setHead(`Schedule · ${played ? wins + '-' + (played - wins) : 'season not started'}`);
+      out.className = ''; out.style.display = 'grid'; out.style.gap = '10px';
+      out.innerHTML = data.map(e => evRow(e, { team: t })).join('') || '<div class="empty">No games found.</div>';
+      const next = out.querySelector('[data-up="1"]');
+      if (next) next.scrollIntoView({ block: 'center' });
+    }
+  } catch {
+    out.innerHTML = 'Could not load the schedule.<br><br><button onclick="renderSchedule()">Retry</button>';
+  }
+}
+
+async function renderBox(id) {
+  setTab('schedule'); $('foot').innerHTML = ''; setHead('Box score'); setBanner('');
+  $('list').innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const { data: b, stale } = await boxScore(id);
+    setBanner(stale ? 'Offline. Showing saved data.' : '');
+    const away = b.teams.find(t => !t.home), home = b.teams.find(t => t.home);
+    const n = Math.max(away.lines.length, home.lines.length);
+    const heads = Array.from({ length: n }, (_, i) => i < 4 ? i + 1 : (n - 4 === 1 ? 'OT' : 'OT' + (i - 3)));
+    const line = t => `<tr><td>${esc(t.abbr)}</td>${t.lines.map(x => `<td>${esc(x)}</td>`).join('')}<td><b>${esc(t.score)}</b></td></tr>`;
+    let html = `<a class="back" href="javascript:history.back()">‹ Back</a>
+      <div class="score-head"><span>${esc(away.name)} ${esc(away.score)}</span><span>${esc(home.name)} ${esc(home.score)}</span></div>
+      <div class="when" style="color:var(--muted)">${esc(b.detail)}</div>
+      <div class="scroll" style="margin-top:8px"><table><tr><th></th>${heads.map(h => `<th>${h}</th>`).join('')}<th>T</th></tr>${line(away)}${line(home)}</table></div>`;
+    const cols = ['MIN', 'PTS', 'REB', 'AST', 'FG', '3PT', 'FT', 'STL', 'BLK', 'TO', '+/-'];
+    for (const team of [away, home]) {
+      const p = b.players.find(x => x.abbr === team.abbr);
+      if (!p || !p.rows.length) continue;
+      const idx = cols.map(c => p.labels.indexOf(c));
+      const cell = (arr, i) => i < 0 ? '' : esc(arr[i] ?? '');
+      const played = p.rows.filter(r => !r.dnp), out = p.rows.filter(r => r.dnp);
+      html += `<h2>${esc(team.name)}</h2><div class="scroll"><table><tr><th>Player</th>${cols.map(c => `<th>${c}</th>`).join('')}</tr>
+        ${played.map(r => `<tr><td>${esc(r.n)}</td>${idx.map(i => `<td>${cell(r.s, i)}</td>`).join('')}</tr>`).join('')}
+        <tr class="tot"><td>Team</td>${idx.map(i => `<td>${cell(p.totals, i)}</td>`).join('')}</tr>
+        ${out.map(r => `<tr class="dnp"><td>${esc(r.n)}</td><td colspan="${cols.length}" style="text-align:left">DNP${r.why ? ' - ' + esc(r.why) : ''}</td></tr>`).join('')}
+        </table></div>`;
+    }
+    $('list').innerHTML = `<div class="box">${html}</div>`;
+    $('list').style.display = 'block';
+  } catch {
+    $('list').innerHTML = '<div class="empty">Could not load this box score.<br><br><button onclick="route()">Retry</button></div>';
+  }
+}
+
+/* ---------- menu + routing ---------- */
+async function loadMenu() {
   try {
     const res = await fetch(MENU_URL + '?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error(res.status);
-    const menu = await res.json();
+    menu = await res.json();
     try { localStorage.setItem('menu', JSON.stringify(menu)); } catch {}
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' });
-    render(menu, menu.date && menu.date !== today ? `This menu is for ${menu.date}. Today's isn't published yet.` : '');
+    return menu.date && menu.date !== todayStr() ? `This menu is for ${menu.date}. Today's isn't published yet.` : '';
   } catch {
-    let cached = null;
-    try { cached = JSON.parse(localStorage.getItem('menu')); } catch {}
-    if (cached) render(cached, 'Offline. Showing the last saved menu.');
-    else { $('sub').textContent = ''; $('list').innerHTML = '<div class="empty">Could not load the menu.<br><br><button onclick="load()">Retry</button></div>'; }
+    try { menu = JSON.parse(localStorage.getItem('menu')); } catch {}
+    return menu ? 'Offline. Showing the last saved menu.' : null;
   }
 }
-load();
-document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+
+async function route() {
+  const h = location.hash.replace(/^#/, '');
+  $('list').style.display = '';
+  if (h.startsWith('game/')) return renderBox(h.slice(5));
+  if (h === 'schedule') { if (!menu) await loadMenu(); return renderSchedule(); }
+  const note = await loadMenu();
+  if (note === null) { setTab('tonight'); setHead(''); $('list').innerHTML = '<div class="empty">Could not load the menu.<br><br><button onclick="route()">Retry</button></div>'; return; }
+  renderTonight(note);
+}
+window.addEventListener('hashchange', route);
+route();
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !location.hash.startsWith('#game/')) route(); });
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>

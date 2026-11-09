@@ -18,7 +18,18 @@ Installable web app (PWA) that shows the daily "League Pass Menu": every NBA gam
   "tiers": "...", "sources": "..." }
 ```
 
-The current `menu.json` is sample data.
+## Schedule and box scores
+
+The **Schedule** tab reads ESPN's public NBA JSON straight from the page (no server, nothing stored in the repo):
+a team's full regular season (default: Spurs) or all games for any date. Tap a finished or live game for its box score.
+Today's games show the rating from `menu.json`. Fetched data is compacted and cached in `localStorage` for offline use.
+ESPN's API is unofficial; if it changes, the Schedule tab is what breaks, not the daily menu.
+
+## Android app
+
+`android/` is a tiny native shell (about 12 KB): it opens the site full-screen and, after 3 PM Monterrey time, posts the
+`push` text from `menu.json` as a notification. The GitHub Actions workflow builds a signed APK on every change under
+`android/` and publishes it at `releases/latest/download/league-pass-menu.apk`.
 
 ## Run locally
 
