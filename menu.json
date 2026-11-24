@@ -1,150 +1,52 @@
 {
- "date": "2026-11-23",
- "date_label": "Monday, Nov 23",
- "generated_at": "2026-11-23T21:21:41Z",
- "push": "Spurs @ Kings 4/10 9:00 - Wemby and Fox questionable, should win\nBlazers @ 76ers 8/10 6:00 - Embiid questionable, should be close\nGrizzlies @ Hornets 4/10 6:00 - Young Grizzlies against a gutted Hornets team",
+ "date": "2026-11-24",
+ "date_label": "Tuesday, Nov 24",
+ "generated_at": "2026-11-24T21:21:35Z",
+ "push": "Mavericks @ Nuggets 5/10 9:00 - Jokic vs Flagg, Mavs short-handed\nPistons @ Magic 4/10 6:00 - Cade probable, Banchero and Duren out\nCeltics @ Wizards 3/10 7:00 - likely Boston blowout, Wizards depleted",
  "games": [
   {
-   "score": 8,
+   "score": 5,
    "spurs": false,
    "away": {
-    "name": "Trail Blazers",
-    "record": "10-6"
-   },
-   "home": {
-    "name": "76ers",
-    "record": "14-3"
-   },
-   "tip": "6:00 PM",
-   "notes": "Embiid questionable; Morant and Sharpe out for Portland. Best game on the board: Philly at 14-3 against a young Blazers team, should be close if Embiid plays."
-  },
-  {
-   "score": 4,
-   "spurs": true,
-   "away": {
-    "name": "Spurs",
-    "record": "14-3"
-   },
-   "home": {
-    "name": "Kings",
-    "record": "2-14"
-   },
-   "tip": "9:00 PM",
-   "notes": "Wembanyama and Fox questionable, Harper out. Kings are 2-14 without Simmons, so the Spurs should win easily, but the stars' status decides if it's worth your night."
-  },
-  {
-   "score": 4,
-   "spurs": false,
-   "away": {
-    "name": "Grizzlies",
-    "record": "12-5"
-   },
-   "home": {
-    "name": "Hornets",
-    "record": "4-11"
-   },
-   "tip": "6:00 PM",
-   "notes": "Boozer and Grant out for Memphis; Knueppel, Allen and Schroder out for Charlotte. Young Grizzlies should handle a gutted Hornets team, watch for the rookies."
-  },
-  {
-   "score": 3,
-   "spurs": false,
-   "away": {
-    "name": "Thunder",
+    "name": "Mavericks",
     "record": "10-7"
    },
    "home": {
-    "name": "Pacers",
-    "record": "5-12"
-   },
-   "tip": "6:30 PM",
-   "notes": "J. Williams, Caruso and Holmgren out for OKC; Haliburton out, Siakam questionable for Indiana. Both on the second night of a back-to-back, a watered-down matchup."
-  },
-  {
-   "score": 3,
-   "spurs": false,
-   "away": {
-    "name": "Suns",
-    "record": "8-7"
-   },
-   "home": {
-    "name": "Pelicans",
-    "record": "5-13"
-   },
-   "tip": "7:00 PM",
-   "notes": "Zion probable, Mark Williams out for Phoenix. Two teams going nowhere; only worth it for Zion."
-  },
-  {
-   "score": 3,
-   "spurs": false,
-   "away": {
-    "name": "Clippers",
-    "record": "4-11"
-   },
-   "home": {
-    "name": "Rockets",
-    "record": "12-5"
-   },
-   "tip": "7:30 PM",
-   "notes": "Beal out for LA. Rockets are a real contender but the Clippers have little left, likely blowout."
-  },
-  {
-   "score": 3,
-   "spurs": false,
-   "away": {
-    "name": "Jazz",
-    "record": "3-15"
-   },
-   "home": {
-    "name": "Lakers",
-    "record": "14-3"
+    "name": "Nuggets",
+    "record": "10-5"
    },
    "tip": "9:00 PM",
-   "notes": "Reaves out for LA; Markkanen, Jackson and Hayes out for Utah on a back-to-back. Likely blowout."
+   "notes": "Lively, Lawal out and P.J. Washington questionable for Dallas. Jokic against Cooper Flagg is the draw, but Denver should control it at home."
   },
   {
-   "score": 2,
+   "score": 4,
    "spurs": false,
    "away": {
-    "name": "Bucks",
-    "record": "1-16"
+    "name": "Pistons",
+    "record": "10-6"
    },
    "home": {
-    "name": "Raptors",
-    "record": "6-10"
+    "name": "Magic",
+    "record": "7-9"
    },
-   "tip": "6:30 PM",
-   "notes": "Bradley questionable, Barrett and Leonard out for Toronto. Worst team in the league against a banged-up one, skip."
+   "tip": "6:00 PM",
+   "notes": "Duren out for Detroit, Cade Cunningham probable; Banchero and Isaac out for Orlando. Cade carries a thin Magic matchup, Detroit favored."
   },
   {
-   "score": 2,
+   "score": 3,
    "spurs": false,
    "away": {
-    "name": "Nets",
-    "record": "3-12"
+    "name": "Celtics",
+    "record": "11-6"
    },
    "home": {
-    "name": "Timberwolves",
-    "record": "12-5"
-   },
-   "tip": "6:30 PM",
-   "notes": "Edwards out for Minnesota, but Brooklyn has nothing to exploit it. Likely blowout, skip."
-  },
-  {
-   "score": 2,
-   "spurs": false,
-   "away": {
-    "name": "Cavaliers",
-    "record": "9-8"
-   },
-   "home": {
-    "name": "Bulls",
-    "record": "4-12"
+    "name": "Wizards",
+    "record": "7-11"
    },
    "tip": "7:00 PM",
-   "notes": "Mobley out for Cleveland; Powell and Wilson out, Claxton questionable for Chicago on a back-to-back. Two middling teams, skip."
+   "notes": "Mitchell Robinson out for Boston; Wizards miss Vukcevic, Watkins, Champagnie and Tre Mann is questionable. Boston should roll, likely blowout."
   }
  ],
  "tiers": "Contender: Spurs, Thunder, Knicks, 76ers, Celtics, Lakers, Rockets, Timberwolves, Warriors | Young & fun: Pistons, Mavericks, Raptors, Trail Blazers, Grizzlies, Wizards | Mid: Cavaliers, Heat, Pacers, Nuggets, Hawks, Magic | Tanking or boring: Bulls, Bucks, Kings, Clippers, Pelicans, Suns, Hornets, Nets, Jazz | Tier moves: none",
- "sources": "ESPN scoreboard, injuries and rosters JSON; official NBA injury report snapshot 2026-11-23 04:15 PM ET; tiers.json"
+ "sources": "ESPN scoreboard and injuries API, tiers.json, official NBA injury report 4:15 PM ET snapshot"
 }
